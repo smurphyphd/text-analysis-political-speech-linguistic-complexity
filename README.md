@@ -12,6 +12,7 @@ This repository contains a replication of:
 - Harvard Dataverse data files and Rscripts (from Authors) used in replication are found in "dataverse" folder.
 - Code Rscripts created by Sara for replication are found in "code" folder.
 - Figures and Tables created by Sara for replication are found in "figures and tables" folder.
+- Replication report created by Sara, outlining replication process, main differences, replication autopsy and replication extension is found in "report" folder.
 ---
 
 # Overview

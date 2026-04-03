@@ -19,8 +19,9 @@ This repository contains a replication of:
 - Download github repository by clicking green "Code" button.
 - From Downloads, save zipped folder to desktop, which contains all of the files from the github repository.
 - Unzip the folder, which will maintain and reproduce the file and folder structure from the github repository.
-- Within RStudio: file --> open --> select one of the Rmarkdown files from the unzipped folder.
-- RMarkdown files should run accordingly withour error in RStudio.
+- Within RStudio: file --> new project --> existing directory --> select unzipped repository folder (text-analysis-political-speech-linguistic-complexity)
+- Check: library(here) here() should now reference repository folder
+- RMarkdown files should run accordingly without error in RStudio.
 
 # Overview
 

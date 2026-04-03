@@ -7,7 +7,8 @@ This repository contains a replication of:
 
 > Schoonvelde, M., Brosius, A., Schumacher, G., Bakker, B. (2019). _Liberals lecture, conservatives communicate: Analyzing complexity and ideology in 381,609 political speeches_. PLOS |ONE.
 
-A link to the public version of the journal article can be found here: https://pmc.ncbi.nlm.nih.gov/articles/PMC6364865/
+- A link to the public version of the journal article can be found here: https://pmc.ncbi.nlm.nih.gov/articles/PMC6364865/. PDF copies are found in "docs" folder.
+- In-class replication presentation is found in "presentation" folder.
 ---
 
 # Overview

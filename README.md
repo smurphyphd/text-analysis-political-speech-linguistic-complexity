@@ -16,11 +16,11 @@ This repository contains a replication of:
 ---
 # Steps
 
-- Download by clicking green "Code" button.
-- Save zipped file to desktop
-- Unzip the file, which will maintain and reproduce the file and folder structure from the github repository.
-- Within RStudio: file --> open --> select one of the Rmarkdown files
-- RMarkdown files should run accordingly.
+- Download github repository by clicking green "Code" button.
+- From Downloads, save zipped folder to desktop, which contains all of the files from the github repository.
+- Unzip the folder, which will maintain and reproduce the file and folder structure from the github repository.
+- Within RStudio: file --> open --> select one of the Rmarkdown files from the unzipped folder.
+- RMarkdown files should run accordingly withour error in RStudio.
 
 # Overview
 

@@ -17,7 +17,9 @@ This repository contains a replication of:
 # Steps
 
 - Download by clicking green "Code" button.
-- Save zipped file to desktop, maintaining file structure from the repository.
+- Save zipped file to desktop
+- Unzip the file, which will maintain and reproduce the file and folder structure from the github repository.
+- Within RStudio: file --> open --> select one of the Rmarkdown files
 - RMarkdown files should run accordingly.
 
 # Overview

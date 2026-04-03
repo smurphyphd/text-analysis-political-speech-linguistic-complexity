@@ -10,7 +10,7 @@ This repository contains a replication of:
 - A link to the public version of the journal article can be found here: https://pmc.ncbi.nlm.nih.gov/articles/PMC6364865/. PDF copies are found in "docs" folder.
 - In-class replication presentation by Sara is found in "presentation" folder.
 - Harvard Dataverse data files and Rscripts (from Authors) used in replication are found in "dataverse" folder.
-- Code Rscripts created by Sara for replication are found in "code" folder.
+- Code RMarkdowns created by Sara for replication are found in the main branch of the repository.
 - Figures and Tables created by Sara for replication are found in "figures and tables" folder.
 - Replication report created by Sara, outlining replication process, main differences, replication autopsy and replication extension is found in "report" folder.
 ---
@@ -50,9 +50,10 @@ Due to licensing restrictions, some raw data may not be redistributed. Instructi
 
 # Code
 
-The code should be ran in the following order:
+The code is found within 2 R Markdown files. They will run separately - they do not need to be run in chronological order. However, the "Phase 1" R markdown was created first and correponds with Phase 1 (above).
 
-- 
+- Sara's Replication - Phase 1 (RMarkdown)
+- Sara's Replication - Phase 2a 2b (RMarkdown)
 
 ---
 

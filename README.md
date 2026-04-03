@@ -17,7 +17,7 @@ This repository contains a replication of:
 # Steps
 
 - Download github repository by clicking green "Code" button.
-- From Downloads, save zipped folder to desktop, which contains all of the files from the github repository.
+- From Downloads, save zipped folder to desktop, which contains all of the files from the github repository. Or leave in Downloads.
 - Unzip the folder, which will maintain and reproduce the file and folder structure from the github repository.
 - Within RStudio: file --> new project --> existing directory --> select unzipped repository folder (text-analysis-political-speech-linguistic-complexity)
 - Check: library(here) here() should now reference repository folder

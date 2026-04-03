@@ -1,5 +1,5 @@
 # text-analysis-political-speech-linguistic-complexity
-Replication of Schoonvelde et al. (2019) "Liberals lecture, conservatives communicate: Analyzing complexity and ideology in 381,609 political speeches." GitHub includes dataset used, RCode, README file, powerpoint and document outline replication differences and replication autopsy observations.
+Sara Murphy's replication of Schoonvelde et al. (2019) "Liberals lecture, conservatives communicate: Analyzing complexity and ideology in 381,609 political speeches." GitHub includes dataset used, RCode, README file, powerpoint and document outline replication differences and replication autopsy observations. Completed for Computational Text Analysis course, Western University, PS9594A.
 
 # Replication of "Liberals Lecture, conservatives communicate: Analyzing complexity and ideology in 381,609 political speeches"
 
@@ -40,6 +40,14 @@ The replication uses data from:
 - Phase 2b: Unprocessed congress Netherlands corpora = 
 
 Due to licensing restrictions, some raw data may not be redistributed. Instructions for access are provided below.
+
+---
+
+# Code
+
+The code should be ran in the following order:
+
+- 
 
 ---
 

@@ -16,15 +16,15 @@ This project replicates the main findings of the original study using publicly a
 The replication focuses on:
 
 - **Phase 1: Reproducing key figures and tables using pre-processed sample data**
-Assessing discrepancies in linguistic measurement
+- Assessing discrepancies in linguistic measurement
 - **Phase 2a: Reconstructing Flesch-Kincaid complexity scores using unprocessed speech data (sample of 4/5 Parliaments)**
-Comparing replicated vs. original complexity measures on word count, sentence count, syllable count
-Reproducing key figures and tables using replicated complexity measures
-Assessing discrepancies in linguistic measurement
+- Comparing replicated vs. original complexity measures on word count, sentence count, syllable count
+- Reproducing key figures and tables using replicated complexity measures
+- Assessing discrepancies in linguistic measurement
 - **Phase 2b: Reconstructing Flesch-Kincaid complexity scores using unprocessed speech data (EU speeches and Congress Netherlands speeches)**
-Comparing replicated vs. original complexity measures on word count, sentence count, syllable count
-Reproducing key figures and tables using replicated complexity measures
-Assessing discrepancies in linguistic measurement
+- Comparing replicated vs. original complexity measures on word count, sentence count, syllable count
+- Reproducing key figures and tables using replicated complexity measures
+- Assessing discrepancies in linguistic measurement
   
 ---
 

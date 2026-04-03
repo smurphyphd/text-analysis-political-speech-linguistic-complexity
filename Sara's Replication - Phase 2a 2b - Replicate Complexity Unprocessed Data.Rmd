@@ -1,0 +1,2466 @@
+---
+title: "Replication Paper - Sara - Unprocessed Sample Speech Data"
+author: "Sara Murphy"
+date: "2026-03-18"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,      # hide all code
+  message = FALSE,   # hide messages
+  warning = FALSE    # hide warnings
+)
+```
+
+## Sara's Attempt - Liberals Lecture, Conservatives Communicate
+
+## REPLICATION OF UNPROCESSED DATA
+
+#Load Data - PARLIAMENT SPEECHES
+Loaded the data, found key columns.
+
+# 1) GBR - GREAT BRITAIN - HOUSE OF COMMONS 
+3,873 speeches
+
+
+```{r}
+library(tidyverse)
+library(here)
+
+temp_env <- new.env()
+load(here("dataverse", "phase2a", "HouseofCommons_Sample.Rdata"), envir = temp_env)
+ls(temp_env)
+
+#rename to Parliament speeches
+gbr_sample <- temp_env$hoc.corpus.sample
+
+# Dataset is called speeches
+View(gbr_sample)      # spreadsheet view
+head(gbr_sample)      # first rows
+str(gbr_sample)       # structure (VERY important)
+dim(gbr_sample)       # rows × columns
+names(gbr_sample)     # variable names
+
+
+```
+# 2) ESP - SPAIN - CONGRESSO
+3,270
+
+```{r}
+temp_env <- new.env()
+load(here("dataverse", "phase2a", "Congresso_Sample.Rdata"), envir = temp_env)
+ls(temp_env)
+
+#rename to Parliament speeches
+esp_sample <- temp_env$cong.corpus.sample
+
+# Dataset is called speeches
+View(esp_sample)      # spreadsheet view
+head(esp_sample)      # first rows
+str(esp_sample)       # structure (VERY important)
+dim(esp_sample)       # rows × columns
+names(esp_sample)     # variable names
+
+```
+# 3) GER - GERMANY - BUNDESTAG
+4,960
+
+```{r}
+temp_env <- new.env()
+load(here("dataverse", "phase2a", "Bundestag_Sample.Rdata"), envir = temp_env)
+ls(temp_env)
+
+#rename to Parliament speeches
+ger_sample <- temp_env$bt.corpus.sample
+
+# Dataset is called speeches
+View(ger_sample)      # spreadsheet view
+head(ger_sample)      # first rows
+str(ger_sample)       # structure (VERY important)
+dim(ger_sample)       # rows × columns
+names(ger_sample)     # variable names
+
+```
+# 4) NLD - NETHERLANDS - TWEEDE KAMER
+3,865
+Random sample?
+
+```{r}
+temp_env <- new.env()
+load(here("dataverse", "phase2a", "TweedeKamer_Sample.Rdata"), envir = temp_env)
+ls(temp_env)
+
+#rename to Parliament speeches
+nld_sample <- temp_env$tk.corpus.sample
+
+# Dataset is called speeches
+View(nld_sample)      # spreadsheet view
+head(nld_sample)      # first rows
+str(nld_sample)       # structure (VERY important)
+dim(nld_sample)       # rows × columns
+names(nld_sample)     # variable names
+
+```
+#Load Data - EU SPEECHES
+Loaded the data, found key columns.
+
+```{r}
+library(tidyverse)
+library(here)
+
+eu_sample <- read_csv(here("dataverse", "phase2b", "EUSPeech_Validation.csv"))
+
+
+# Dataset is called speeches
+View(eu_sample)      # spreadsheet view
+head(eu_sample)      # first rows
+str(eu_sample)       # structure (VERY important)
+dim(eu_sample)       # rows × columns
+names(eu_sample)     # variable names
+
+```
+#Load Data - CONGRESS SPEECHES - DUTCH/NETHERLANDS
+Loaded the data, found key columns.
+
+```{r}
+library(tidyverse)
+library(here)
+
+congress_nld_sample <- read_csv(here("dataverse", "phase2b", "Congress_Dutch_Validation.csv"))
+
+# Dataset is called speeches
+View(congress_nld_sample)      # spreadsheet view
+head(congress_nld_sample)      # first rows
+str(congress_nld_sample)       # structure (VERY important)
+dim(congress_nld_sample)       # rows × columns
+names(congress_nld_sample)     # variable names
+
+```
+
+# REPLICATE DV - Linguistic Complexity Flesch Grade
+
+# 1) GBR
+
+```{r}
+library(quanteda)
+library(quanteda.textstats)
+
+# create corpus
+corp_gbr <- corpus(gbr_sample, text_field = "text")
+
+# compute readability
+readability_scores <- textstat_readability(
+  corp_gbr,
+  measure = "Flesch.Kincaid"
+)
+
+# add score back to original data
+gbr_sample$complexity <- readability_scores$Flesch.Kincaid
+head(readability_scores)
+head(gbr_sample$complexity)
+summary(gbr_sample$complexity)
+
+
+# if your texts are in a data frame called df with column text
+read_out <- textstat_readability(
+  gbr_sample$text,
+  measure = "Flesch.Kincaid",
+  intermediate = TRUE
+)
+names(read_out)
+head(read_out)
+
+# Extract Word, Word Count and Syllables - Quanteda
+gbr_sample$word_count_quanteda     <- read_out$W
+gbr_sample$sentence_count_quanteda <- read_out$St
+gbr_sample$syllables_quanteda      <- read_out$Sy
+
+# Calculate Differences
+gbr_sample <- gbr_sample %>%
+  mutate(
+    word_diff_q      = word_count_quanteda - length,
+    sentence_diff_q  = sentence_count_quanteda - sentences,
+    syllable_diff_q  = syllables_quanteda - syllables
+  )
+
+#Correlations 
+cor(gbr_sample$length, gbr_sample$word_count_quanteda, use = "complete.obs")
+cor(gbr_sample$sentences, gbr_sample$sentence_count_quanteda, use = "complete.obs")
+cor(gbr_sample$syllables, gbr_sample$syllables_quanteda, use = "complete.obs")
+```
+
+
+```{r}
+# Graph
+ggplot(gbr_sample, aes(x = length, y = word_count_quanteda)) +
+  geom_point(alpha = 0.3) +
+  geom_abline(slope = 1, intercept = 0) +
+  labs(title = "Word Count: Original vs Replicated - GBR")
+
+ggplot(gbr_sample, aes(x = sentences, y = sentence_count_quanteda)) +
+  geom_point(alpha = 0.3) +
+  geom_abline(slope = 1, intercept = 0) +
+  labs(title = "Sentence Count: Original vs Replicated - GBR")
+
+ggplot(gbr_sample, aes(x = syllables, y = syllables_quanteda)) +
+  geom_point(alpha = 0.3) +
+  geom_abline(slope = 1, intercept = 0) +
+  labs(title = "Syllable Count: Original vs Replicated - GBR")
+
+gbr_sample$country <- "UK"
+
+saveRDS(gbr_sample, "gbr_sample_edited.rds")
+```
+
+#GBR - Assess Replication to Original 
+
+You can say something like:
+“The replicated Flesch-Kincaid scores are highly correlated with the original measures (r = X.XX).”
+“The mean difference between measures is small (M = X.XX, SD = X.XX).”
+“Visual inspection (Figure X) shows strong alignment along the 45-degree line.”
+
+✅ What your plot shows (big picture)
+1. Strong positive relationship
+The points form a tight upward-sloping cloud
+This means your replicated scores track the authors’ scores closely
+👉 Interpretation:
+✔ You are capturing the same underlying signal of complexity
+2. Close to the 45° line (red line)
+The red line represents perfect replication (your score = their score)
+Most points are clustered near it
+👉 Interpretation:
+✔ Your implementation is largely correct
+✔ No major coding mistake
+⚠️ What’s not perfect (and very important for your paper)
+3. Systematic deviation at higher values
+At higher Flesch grades (≈ 13–20):
+Your points tend to sit above the line
+👉 This means:
+You are overestimating complexity for harder texts
+4. Increasing spread (heteroskedasticity)
+The scatter widens as scores increase
+👉 Interpretation:
+Your method is less precise for complex speeches
+Likely due to:
+sentence splitting differences
+syllable counting differences
+punctuation handling
+5. Outliers
+A few points are far above the line (e.g., 25–30)
+👉 These are likely:
+badly parsed speeches
+very short texts
+encoding/tokenization issues
+📊 What this means for your replication
+✔ What you can confidently claim:
+High convergent validity
+Strong correlation with original measure
+Correct implementation of Flesch-Kincaid formula
+⚠️ What you should acknowledge:
+Small but systematic differences
+Especially for high-complexity texts
+
+```{r}
+# Calculate Differences - My Complexity to Flesch Grade Score of Authors
+gbr_sample$difference <- gbr_sample$complexity - gbr_sample$flesh.grade
+gbr_sample$abs_diff <- abs(gbr_sample$difference)
+
+summary(gbr_sample$difference)
+mean(gbr_sample$difference, na.rm = TRUE)
+sd(gbr_sample$difference, na.rm = TRUE)
+mean(gbr_sample$abs_diff, na.rm = TRUE)
+
+#Correlation
+cor(gbr_sample$complexity, gbr_sample$flesh.grade, use = "complete.obs")
+
+#T Test
+t.test(gbr_sample$difference)
+
+library(ggplot2)
+
+ggplot(gbr_sample, aes(x = flesh.grade, y = complexity)) +
+  geom_point(alpha = 0.4) +
+  geom_abline(slope = 1, intercept = 0, color = "red") +
+  labs(
+    x = "Authors' Flesch Grade",
+    y = "Replicated Flesch Grade",
+    title = "Difference Between My Replication and Authors' Flesch-Kincaid Scores - GBR"
+  ) +
+  theme_minimal()
+
+```
+#Differences in Word Count and Sentence Count
+💡 VERY IMPORTANT INSIGHT FOR YOUR PAPER
+You are not just “recomputing” — you are testing:
+👉 Is their reported complexity reproducible from raw text?
+So your paper can say:
+“We reconstruct word and sentence counts using independent tokenization methods”
+“We compare reconstructed values to original dataset variables”
+“Differences arise from preprocessing and tokenization choices”
+
+Note: Fewer differences in English, GBR
+
+```{r}
+library(stringr)
+
+gbr_sample$word_count <- str_count(gbr_sample$text, "\\S+")
+
+gbr_sample$sentence_count <- str_count(gbr_sample$text, "[.!?]+")
+
+# Differences
+gbr_sample$diff_words <- gbr_sample$length - gbr_sample$word_count
+gbr_sample$diff_sentences <- gbr_sample$sentences - gbr_sample$sentence_count
+
+#correlations
+cor(gbr_sample$length, gbr_sample$word_count)
+cor(gbr_sample$sentences, gbr_sample$sentence_count)
+
+# Graph
+ggplot(gbr_sample, aes(x = length, y = word_count)) +
+  geom_point(alpha = 0.3) +
+  geom_abline(slope = 1, intercept = 0) +
+  labs(title = "Word Count: Original vs Replicated - GBR")
+
+ggplot(gbr_sample, aes(x = sentences, y = sentence_count)) +
+  geom_point(alpha = 0.3) +
+  geom_abline(slope = 1, intercept = 0) +
+  labs(title = "Sentence Count: Original vs Replicated - GBR")
+
+gbr_sample$country <- "UK"
+
+saveRDS(gbr_sample, "gbr_sample_edited.rds")
+
+```
+
+# 2) ESP - Flesch Grade
+
+```{r}
+library(quanteda)
+library(quanteda.textstats)
+
+# create corpus
+corp_esp <- corpus(esp_sample, text_field = "text")
+
+# compute readability
+readability_scores <- textstat_readability(
+  corp_esp,
+  measure = "Flesch.Kincaid"
+)
+
+# add score back to original data
+esp_sample$complexity <- readability_scores$Flesch.Kincaid
+
+head(readability_scores)
+head(esp_sample$complexity)
+summary(esp_sample$complexity)
+
+
+# if your texts are in a data frame called df with column text
+read_out <- textstat_readability(
+  esp_sample$text,
+  measure = "Flesch.Kincaid",
+  intermediate = TRUE
+)
+names(read_out)
+head(read_out)
+
+# Extract Word, Word Count and Syllables - Quanteda
+esp_sample$word_count_quanteda     <- read_out$W
+esp_sample$sentence_count_quanteda <- read_out$St
+esp_sample$syllables_quanteda      <- read_out$Sy
+
+# Calculate Differences
+esp_sample <- esp_sample %>%
+  mutate(
+    word_diff_q      = word_count_quanteda - length,
+    sentence_diff_q  = sentence_count_quanteda - sentences,
+    syllable_diff_q  = syllables_quanteda - syllables
+  )
+
+#Correlations 
+cor(esp_sample$length, esp_sample$word_count_quanteda, use = "complete.obs")
+cor(esp_sample$sentences, esp_sample$sentence_count_quanteda, use = "complete.obs")
+cor(esp_sample$syllables, esp_sample$syllables_quanteda, use = "complete.obs")
+```
+```{r}
+# Graph
+ggplot(esp_sample, aes(x = length, y = word_count_quanteda)) +
+  geom_point(alpha = 0.3) +
+  geom_abline(slope = 1, intercept = 0) +
+  labs(title = "Word Count: Original vs Replicated - ESP")
+
+ggplot(esp_sample, aes(x = sentences, y = sentence_count_quanteda)) +
+  geom_point(alpha = 0.3) +
+  geom_abline(slope = 1, intercept = 0) +
+  labs(title = "Sentence Count: Original vs Replicated - ESP")
+
+ggplot(esp_sample, aes(x = syllables, y = syllables_quanteda)) +
+  geom_point(alpha = 0.3) +
+  geom_abline(slope = 1, intercept = 0)+
+  labs(title = "Syllable Count: Original vs Replicated - ESP")
+
+esp_sample$country <- "Spain"
+
+saveRDS(esp_sample, "esp_sample_edited.rds")
+```
+
+# ESP - Assess Replication
+
+7. How to explain this in your paper
+You can confidently write:
+“The Flesch-Kincaid scores are computed using the standard formula, identical to that implemented in common text analysis packages such as quanteda. Differences between the replicated and original scores are therefore attributable not to the formula itself, but to differences in text preprocessing, sentence segmentation, and syllable counting algorithms.”
+
+✅ 1. Core result: VERY strong replication
+The points lie tightly along the 45° line
+Clear linear relationship across the entire range
+👉 Interpretation:
+✔ Your implementation is correct
+✔ You are capturing the same underlying construct as the authors
+⚠️ 2. But now we see a clearer pattern: systematic upward bias
+Compared to your first plot, this one shows it much more clearly:
+🔺 At higher values (≈ 25–40):
+Your replicated scores are consistently ABOVE the red line
+👉 Meaning:
+You are systematically overestimating Flesch-Kincaid scores
+And the bias increases with complexity
+📈 3. This is NOT random error — it’s structural
+This pattern is key:
+Low scores → close to perfect
+High scores → increasingly overestimated
+👉 This tells us:
+❌ Not noise
+❌ Not random measurement error
+✅ A systematic difference in how complexity is computed
+🧠 4. What is causing this (very likely)?
+Given the formula:
+FK
+=
+0.39
+⋅
+words
+sentences
++
+11.8
+⋅
+syllables
+words
+−
+15.59
+FK=0.39⋅ 
+sentences
+words
+​	
+ +11.8⋅ 
+words
+syllables
+​	
+ −15.59
+Your upward bias can only come from:
+🔹 (A) Sentence splitting differences (MOST LIKELY)
+If your code detects fewer sentences, then:
+words
+sentences
+↑
+sentences
+words
+​	
+ ↑
+→ FK score increases
+→ especially for long/complex speeches
+👉 This perfectly matches your pattern:
+bias grows with complexity
+🔹 (B) Syllable counting differences (SECOND LIKELY)
+If quanteda:
+slightly overcounts syllables, especially in Spanish
+Then:
+syllables
+words
+↑
+words
+syllables
+​	
+ ↑
+→ FK score increases
+🔹 (C) Language issue (VERY IMPORTANT HERE)
+This is the Spanish dataset (ESP).
+The authors note:
+“languages may systematically differ in their complexity”
+But more importantly:
+👉 Flesch-Kincaid was designed for English
+So:
+Spanish syllable structure ≠ English
+sentence punctuation rules differ
+➡️ This amplifies discrepancies at higher complexity
+
+
+```{r}
+# Calculate Differences - My Complexity to Flesch Grade Score of Authors
+esp_sample$difference <- esp_sample$complexity - esp_sample$flesh.grade
+esp_sample$abs_diff <- abs(esp_sample$difference)
+
+summary(esp_sample$difference)
+mean(esp_sample$difference, na.rm = TRUE)
+sd(esp_sample$difference, na.rm = TRUE)
+mean(esp_sample$abs_diff, na.rm = TRUE)
+
+#Correlation
+cor(esp_sample$complexity, esp_sample$flesh.grade, use = "complete.obs")
+
+#T Test
+t.test(esp_sample$difference)
+
+library(ggplot2)
+
+ggplot(esp_sample, aes(x = flesh.grade, y = complexity)) +
+  geom_point(alpha = 0.4) +
+  geom_abline(slope = 1, intercept = 0, color = "red") +
+  labs(
+    x = "Authors' Flesch Grade",
+    y = "Replicated Flesch Grade",
+    title = "Difference Between My Replication and Authors' Flesch-Kincaid Scores - ESP"
+  ) +
+  theme_minimal()
+
+
+```
+
+```{r}
+#Word Count and Sentences
+esp_sample$word_count <- str_count(esp_sample$text, "\\S+")
+
+esp_sample$sentence_count <- str_count(esp_sample$text, "[.!?]+")
+
+# Differences
+esp_sample$diff_words <- esp_sample$length - esp_sample$word_count
+esp_sample$diff_sentences <- esp_sample$sentences - esp_sample$sentence_count
+
+#correlations
+cor(esp_sample$length, esp_sample$word_count)
+cor(esp_sample$sentences, esp_sample$sentence_count)
+
+# Graph
+ggplot(esp_sample, aes(x = length, y = word_count)) +
+  geom_point(alpha = 0.3) +
+  geom_abline(slope = 1, intercept = 0) +
+  labs(title = "Word Count: Original vs Replicated - ESP")
+
+ggplot(esp_sample, aes(x = sentences, y = sentence_count)) +
+  geom_point(alpha = 0.3) +
+  geom_abline(slope = 1, intercept = 0) +
+  labs(title = "Sentence Count: Original vs Replicated - ESP")
+
+
+```
+
+Differences in sentence count
+
+## 3) GER - FLESCH GRADE
+
+```{r}
+# create corpus
+corp_ger <- corpus(ger_sample, text_field = "text")
+
+# compute readability
+readability_scores <- textstat_readability(
+  corp_ger,
+  measure = "Flesch.Kincaid"
+)
+
+# add score back to original data
+ger_sample$complexity <- readability_scores$Flesch.Kincaid
+
+head(readability_scores)
+head(ger_sample$complexity)
+summary(ger_sample$complexity)
+
+# if your texts are in a data frame called df with column text
+read_out <- textstat_readability(
+  ger_sample$text,
+  measure = "Flesch.Kincaid",
+  intermediate = TRUE
+)
+names(read_out)
+head(read_out)
+
+# Extract Word, Word Count and Syllables - Quanteda
+ger_sample$word_count_quanteda     <- read_out$W
+ger_sample$sentence_count_quanteda <- read_out$St
+ger_sample$syllables_quanteda      <- read_out$Sy
+
+# Calculate Differences
+ger_sample <- ger_sample %>%
+  mutate(
+    word_diff_q      = word_count_quanteda - length,
+    sentence_diff_q  = sentence_count_quanteda - sentences,
+    syllable_diff_q  = syllables_quanteda - syllables
+  )
+
+#Correlations 
+cor(ger_sample$length, ger_sample$word_count_quanteda, use = "complete.obs")
+cor(ger_sample$sentences, ger_sample$sentence_count_quanteda, use = "complete.obs")
+cor(ger_sample$syllables, ger_sample$syllables_quanteda, use = "complete.obs")
+
+ger_sample$country <- "Germany"
+
+saveRDS(ger_sample, "ger_sample_edited.rds")
+```
+```{r}
+#graph 
+
+ggplot(ger_sample, aes(x = length, y = word_count_quanteda)) +
+  geom_point(alpha = 0.3) +
+  geom_abline(slope = 1, intercept = 0) +
+  labs(title = "Word Count: Original vs Replicated - GER")
+
+ggplot(ger_sample, aes(x = sentences, y = sentence_count_quanteda)) +
+  geom_point(alpha = 0.3) +
+  geom_abline(slope = 1, intercept = 0) +
+  labs(title = "Sentence Count: Original vs Replicated - GER")
+
+ggplot(ger_sample, aes(x = syllables, y = syllables_quanteda)) +
+  geom_point(alpha = 0.3) +
+  geom_abline(slope = 1, intercept = 0)+
+  labs(title = "Syllable Count: Original vs Replicated - GER")
+
+ger_sample$country <- "Germany"
+
+saveRDS(ger_sample, "ger_sample_edited.rds")
+```
+
+
+```{r}
+# Calculate Differences - My Complexity to Flesch Grade Score of Authors
+ger_sample$difference <- ger_sample$complexity - ger_sample$flesh.grade
+ger_sample$abs_diff <- abs(ger_sample$difference)
+
+summary(ger_sample$difference)
+mean(ger_sample$difference, na.rm = TRUE)
+sd(ger_sample$difference, na.rm = TRUE)
+mean(ger_sample$abs_diff, na.rm = TRUE)
+
+#Correlation
+cor(ger_sample$complexity, ger_sample$flesh.grade, use = "complete.obs")
+
+#T Test
+t.test(ger_sample$difference)
+
+library(ggplot2)
+
+ggplot(ger_sample, aes(x = flesh.grade, y = complexity)) +
+  geom_point(alpha = 0.4) +
+  geom_abline(slope = 1, intercept = 0, color = "red") +
+  labs(
+    x = "Authors' Flesch Grade",
+    y = "Replicated Flesch Grade",
+    title = "Difference Between My Replication and Authors' Flesch-Kincaid Scores - GER"
+  ) +
+  theme_minimal()
+
+
+```
+
+```{r}
+#Word Count and Sentences
+ger_sample$word_count <- str_count(ger_sample$text, "\\S+")
+
+ger_sample$sentence_count <- str_count(ger_sample$text, "[.!?]+")
+
+# Differences
+ger_sample$diff_words <- ger_sample$length - ger_sample$word_count
+ger_sample$diff_sentences <- ger_sample$sentences - ger_sample$sentence_count
+
+#correlations
+cor(ger_sample$length, ger_sample$word_count)
+cor(ger_sample$sentences, ger_sample$sentence_count)
+
+# Graph
+ggplot(ger_sample, aes(x = length, y = word_count)) +
+  geom_point(alpha = 0.3) +
+  geom_abline(slope = 1, intercept = 0) +
+  labs(title = "Word Count: Original vs Replicated - GER")
+
+ggplot(ger_sample, aes(x = sentences, y = sentence_count)) +
+  geom_point(alpha = 0.3) +
+  geom_abline(slope = 1, intercept = 0) +
+  labs(title = "Sentence Count: Original vs Replicated - GER")
+
+ger_sample$country <- "Germany"
+
+saveRDS(ger_sample, "ger_sample_edited.rds")
+```
+
+## 4) NLD Parliament - Flesch Grade
+
+Note: Flesh versus Flesch Grade
+
+```{r}
+# create corpus
+corp_nld <- corpus(nld_sample, text_field = "text")
+
+# compute readability
+readability_scores <- textstat_readability(
+  corp_nld,
+  measure = "Flesch.Kincaid"
+)
+
+# add score back to original data
+nld_sample$complexity <- readability_scores$Flesch.Kincaid
+
+head(readability_scores)
+head(nld_sample$complexity)
+summary(nld_sample$complexity)
+
+
+# if your texts are in a data frame called df with column text
+read_out <- textstat_readability(
+  nld_sample$text,
+  measure = "Flesch.Kincaid",
+  intermediate = TRUE
+)
+names(read_out)
+head(read_out)
+
+# Extract Word, Word Count and Syllables - Quanteda
+nld_sample$word_count_quanteda     <- read_out$W
+nld_sample$sentence_count_quanteda <- read_out$St
+nld_sample$syllables_quanteda      <- read_out$Sy
+
+# Calculate Differences
+nld_sample <- nld_sample %>%
+  mutate(
+    word_diff_q      = word_count_quanteda - length,
+    sentence_diff_q  = sentence_count_quanteda - sentences,
+    syllable_diff_q  = syllables_quanteda - syllables
+  )
+
+#Correlations 
+cor(nld_sample$length, nld_sample$word_count_quanteda, use = "complete.obs")
+cor(nld_sample$sentences, nld_sample$sentence_count_quanteda, use = "complete.obs")
+cor(nld_sample$syllables, nld_sample$syllables_quanteda, use = "complete.obs")
+
+
+```
+```{r}
+#graph 
+
+ggplot(nld_sample, aes(x = length, y = word_count_quanteda)) +
+  geom_point(alpha = 0.3) +
+  geom_abline(slope = 1, intercept = 0) +
+  labs(title = "Word Count: Original vs Replicated - NLD")
+
+ggplot(nld_sample, aes(x = sentences, y = sentence_count_quanteda)) +
+  geom_point(alpha = 0.3) +
+  geom_abline(slope = 1, intercept = 0) +
+  labs(title = "Sentence Count: Original vs Replicated - NLD")
+
+ggplot(nld_sample, aes(x = syllables, y = syllables_quanteda)) +
+  geom_point(alpha = 0.3) +
+  geom_abline(slope = 1, intercept = 0)+
+  labs(title = "Syllable Count: Original vs Replicated - NLD")
+
+nld_sample$country <- "Netherlands"
+
+saveRDS(nld_sample, "nld_sample_edited.rds")
+```
+
+```{r}
+# Calculate Differences - My Complexity to Flesch Grade Score of Authors
+nld_sample$difference <- nld_sample$complexity - nld_sample$flesch.grade
+nld_sample$abs_diff <- abs(nld_sample$difference)
+
+summary(nld_sample$difference)
+mean(nld_sample$difference, na.rm = TRUE)
+sd(nld_sample$difference, na.rm = TRUE)
+mean(nld_sample$abs_diff, na.rm = TRUE)
+
+#Correlation
+cor(nld_sample$complexity, nld_sample$flesch.grade, use = "complete.obs")
+
+#T Test
+t.test(nld_sample$difference)
+
+library(ggplot2)
+
+ggplot(nld_sample, aes(x = flesch.grade, y = complexity)) +
+  geom_point(alpha = 0.4) +
+  geom_abline(slope = 1, intercept = 0, color = "red") +
+  labs(
+    x = "Authors' Flesch Grade",
+    y = "Replicated Flesch Grade",
+    title = "Difference Between My Replication and Authors' Flesch-Kincaid Scores - NLD"
+  ) +
+  theme_minimal()
+
+
+```
+
+
+```{r}
+#Word Count and Sentences
+nld_sample$word_count <- str_count(nld_sample$text, "\\S+")
+
+nld_sample$sentence_count <- str_count(nld_sample$text, "[.!?]+")
+
+# Differences
+nld_sample$diff_words <- nld_sample$length - nld_sample$word_count
+nld_sample$diff_sentences <- nld_sample$sentences - nld_sample$sentence_count
+
+#correlations
+cor(nld_sample$length, nld_sample$word_count)
+cor(nld_sample$sentences, nld_sample$sentence_count)
+
+# Graph
+ggplot(nld_sample, aes(x = length, y = word_count)) +
+  geom_point(alpha = 0.3) +
+  geom_abline(slope = 1, intercept = 0) +
+  labs(title = "Word Count: Original vs Replicated - NLD")
+
+ggplot(nld_sample, aes(x = sentences, y = sentence_count)) +
+  geom_point(alpha = 0.3) +
+  geom_abline(slope = 1, intercept = 0) +
+  labs(title = "Sentence Count: Original vs Replicated - NLD")
+
+nld_sample$country <- "Netherlands"
+
+saveRDS(nld_sample, "nld_sample_edited.rds")
+```
+
+```{r}
+# Combine 4 Data Sets
+
+library(dplyr)
+
+gbr_sample <- readRDS("gbr_sample_edited.rds")
+esp_sample <- readRDS("esp_sample_edited.rds")
+ger_sample <- readRDS("ger_sample_edited.rds")
+nld_sample <- readRDS("nld_sample_edited.rds")
+
+combined <- bind_rows(gbr_sample, esp_sample, ger_sample, nld_sample)
+
+names(combined)
+
+View(combined)      # spreadsheet view
+head(combined)      # first rows
+str(combined)       # structure (VERY important)
+dim(combined)       # rows × columns
+
+```
+## 5) EU Parliament/Heads of Government - Flesch Grade - Replicate
+
+1,790 observations
+
+```{r}
+library(quanteda)
+library(quanteda.textstats)
+
+# create corpus
+corp_eu <- corpus(eu_sample, text_field = "text")
+
+# compute readability
+readability_scores <- textstat_readability(
+  corp_eu,
+  measure = "Flesch.Kincaid"
+)
+
+# add score back to original data
+eu_sample$complexity <- readability_scores$Flesch.Kincaid
+
+head(readability_scores)
+head(eu_sample$complexity)
+summary(eu_sample$complexity)
+
+# if your texts are in a data frame called df with column text
+read_out <- textstat_readability(
+  eu_sample$text,
+  measure = "Flesch.Kincaid",
+  intermediate = TRUE
+)
+names(read_out)
+head(read_out)
+
+# Extract Word, Word Count and Syllables - Quanteda
+eu_sample$word_count_quanteda     <- read_out$W
+eu_sample$sentence_count_quanteda <- read_out$St
+eu_sample$syllables_quanteda      <- read_out$Sy
+
+# Calculate Differences
+eu_sample <- eu_sample %>%
+  mutate(
+    word_diff_q      = word_count_quanteda - length,
+    sentence_diff_q  = sentence_count_quanteda - sentences,
+    syllable_diff_q  = syllables_quanteda - syllables
+  )
+
+#Correlations 
+cor(eu_sample$length, eu_sample$word_count_quanteda, use = "complete.obs")
+cor(eu_sample$sentences, eu_sample$sentence_count_quanteda, use = "complete.obs")
+cor(eu_sample$syllables, eu_sample$syllables_quanteda, use = "complete.obs")
+
+```
+```{r}
+#graph 
+
+ggplot(eu_sample, aes(x = length, y = word_count_quanteda)) +
+  geom_point(alpha = 0.3) +
+  geom_abline(slope = 1, intercept = 0) +
+  labs(title = "Word Count: Original vs Replicated - EU")
+
+ggplot(eu_sample, aes(x = sentences, y = sentence_count_quanteda)) +
+  geom_point(alpha = 0.3) +
+  geom_abline(slope = 1, intercept = 0) +
+  labs(title = "Sentence Count: Original vs Replicated - EU")
+
+ggplot(eu_sample, aes(x = syllables, y = syllables_quanteda)) +
+  geom_point(alpha = 0.3) +
+  geom_abline(slope = 1, intercept = 0)+
+  labs(title = "Syllable Count: Original vs Replicated - EU")
+
+saveRDS(eu_sample, "eu_sample_edited.rds")
+```
+
+
+```{r}
+# Calculate Differences - My Complexity to Flesch Grade Score of Authors
+eu_sample$difference <- eu_sample$complexity - eu_sample$flesh.grade
+eu_sample$abs_diff <- abs(eu_sample$difference)
+
+summary(eu_sample$difference)
+mean(eu_sample$difference, na.rm = TRUE)
+sd(eu_sample$difference, na.rm = TRUE)
+mean(eu_sample$abs_diff, na.rm = TRUE)
+
+#Correlation
+cor(eu_sample$complexity, eu_sample$flesh.grade, use = "complete.obs")
+
+#T Test
+t.test(eu_sample$difference)
+
+library(ggplot2)
+
+ggplot(eu_sample, aes(x = flesh.grade, y = complexity)) +
+  geom_point(alpha = 0.4) +
+  geom_abline(slope = 1, intercept = 0, color = "red") +
+  labs(
+    x = "Authors' Flesch Grade",
+    y = "Replicated Flesch Grade",
+    title = "Difference Between My Replication and Authors' Flesch-Kincaid Scores - EU"
+  ) +
+  theme_minimal()
+
+```
+
+```{r}
+#Word Count and Sentences
+eu_sample$word_count <- str_count(eu_sample$text, "\\S+")
+
+eu_sample$sentence_count <- str_count(eu_sample$text, "[.!?]+")
+
+# Differences
+eu_sample$diff_words <- eu_sample$length - eu_sample$word_count
+eu_sample$diff_sentences <- eu_sample$sentences - eu_sample$sentence_count
+
+#correlations
+cor(eu_sample$length, eu_sample$word_count)
+cor(eu_sample$sentences, eu_sample$sentence_count)
+
+# Graph
+ggplot(eu_sample, aes(x = length, y = word_count)) +
+  geom_point(alpha = 0.3) +
+  geom_abline(slope = 1, intercept = 0) +
+  labs(title = "Word Count: Original vs Replicated - EU")
+
+ggplot(eu_sample, aes(x = sentences, y = sentence_count)) +
+  geom_point(alpha = 0.3) +
+  geom_abline(slope = 1, intercept = 0) +
+  labs(title = "Sentence Count: Original vs Replicated - EU")
+
+saveRDS(eu_sample, "eu_sample_edited.rds")
+```
+## 6) CONGRESS NETHERLANDS - Flesch Grade - Replicate
+
+673 observations
+
+
+```{r}
+library(quanteda)
+library(quanteda.textstats)
+
+# create corpus
+corp_cong_nld <- corpus(congress_nld_sample, text_field = "text")
+
+# compute readability
+readability_scores <- textstat_readability(
+  corp_cong_nld,
+  measure = "Flesch.Kincaid"
+)
+
+# add score back to original data
+congress_nld_sample$complexity <- readability_scores$Flesch.Kincaid
+
+head(readability_scores)
+head(congress_nld_sample$complexity)
+summary(congress_nld_sample$complexity)
+
+# if your texts are in a data frame called df with column text
+read_out <- textstat_readability(
+  congress_nld_sample$text,
+  measure = "Flesch.Kincaid",
+  intermediate = TRUE
+)
+names(read_out)
+head(read_out)
+
+# Extract Word, Word Count and Syllables - Quanteda
+congress_nld_sample$word_count_quanteda     <- read_out$W
+congress_nld_sample$sentence_count_quanteda <- read_out$St
+congress_nld_sample$syllables_quanteda      <- read_out$Sy
+
+# Calculate Differences
+congress_nld_sample <- congress_nld_sample %>%
+  mutate(
+    word_diff_q      = word_count_quanteda - length,
+    sentence_diff_q  = sentence_count_quanteda - sentences,
+    syllable_diff_q  = syllables_quanteda - syllables
+  )
+
+#Correlations 
+cor(congress_nld_sample$length, congress_nld_sample$word_count_quanteda, use = "complete.obs")
+cor(congress_nld_sample$sentences, congress_nld_sample$sentence_count_quanteda, use = "complete.obs")
+cor(congress_nld_sample$syllables, congress_nld_sample$syllables_quanteda, use = "complete.obs")
+```
+```{r}
+#graph 
+
+ggplot(congress_nld_sample, aes(x = length, y = word_count_quanteda)) +
+  geom_point(alpha = 0.3) +
+  geom_abline(slope = 1, intercept = 0) +
+  labs(title = "Word Count: Original vs Replicated - Congress NLD")
+
+ggplot(congress_nld_sample, aes(x = sentences, y = sentence_count_quanteda)) +
+  geom_point(alpha = 0.3) +
+  geom_abline(slope = 1, intercept = 0) +
+  labs(title = "Sentence Count: Original vs Replicated - Congress NLD")
+
+ggplot(congress_nld_sample, aes(x = syllables, y = syllables_quanteda)) +
+  geom_point(alpha = 0.3) +
+  geom_abline(slope = 1, intercept = 0)+
+  labs(title = "Syllable Count: Original vs Replicated - Congress NLD")
+
+saveRDS(congress_nld_sample, "congress_nld_sample_edited.rds")
+```
+
+
+```{r}
+# Calculate Differences - My Complexity to Flesch Grade Score of Authors
+congress_nld_sample$difference <- congress_nld_sample$complexity - congress_nld_sample$flesh.grade
+congress_nld_sample$abs_diff <- abs(congress_nld_sample$difference)
+
+summary(congress_nld_sample$difference)
+mean(congress_nld_sample$difference, na.rm = TRUE)
+sd(congress_nld_sample$difference, na.rm = TRUE)
+mean(congress_nld_sample$abs_diff, na.rm = TRUE)
+
+#Correlation
+cor(congress_nld_sample$complexity, congress_nld_sample$flesh.grade, use = "complete.obs")
+
+#T Test
+t.test(congress_nld_sample$difference)
+
+library(ggplot2)
+
+ggplot(congress_nld_sample, aes(x = flesh.grade, y = complexity)) +
+  geom_point(alpha = 0.4) +
+  geom_abline(slope = 1, intercept = 0, color = "red") +
+  labs(
+    x = "Authors' Flesch Grade",
+    y = "Replicated Flesch Grade",
+    title = "Difference Between My Replication and Authors' Flesch-Kincaid Scores - Congress NLD"
+  ) +
+  theme_minimal()
+```
+
+```{r}
+#Word Count and Sentences
+congress_nld_sample$word_count <- str_count(congress_nld_sample$text, "\\S+")
+
+congress_nld_sample$sentence_count <- str_count(congress_nld_sample$text, "[.!?]+")
+
+# Differences
+congress_nld_sample$diff_words <- congress_nld_sample$length - congress_nld_sample$word_count
+congress_nld_sample$diff_sentences <- congress_nld_sample$sentences - congress_nld_sample$sentence_count
+
+#correlations
+cor(congress_nld_sample$length, congress_nld_sample$word_count)
+cor(congress_nld_sample$sentences, congress_nld_sample$sentence_count)
+
+# Graph
+ggplot(congress_nld_sample, aes(x = length, y = word_count)) +
+  geom_point(alpha = 0.3) +
+  geom_abline(slope = 1, intercept = 0) +
+  labs(title = "Word Count: Original vs Replicated - CONGRESS NLD")
+
+ggplot(congress_nld_sample, aes(x = sentences, y = sentence_count)) +
+  geom_point(alpha = 0.3) +
+  geom_abline(slope = 1, intercept = 0) +
+  labs(title = "Sentence Count: Original vs Replicated - CONGRESS NLD")
+
+saveRDS(congress_nld_sample, "congress_nld_sample_edited.rds")
+```
+# Create Combined Other data set (EU and Congress NLD)
+2,463 observations
+
+```{r}
+
+# Combine 2 other Data Sets
+
+library(dplyr)
+
+eu_sample <- readRDS("eu_sample_edited.rds")
+congress_nld_sample <- readRDS("congress_nld_sample_edited.rds")
+
+combined_other <- bind_rows(eu_sample, congress_nld_sample)
+
+names(combined_other)
+View(combined_other)
+
+```
+
+## REPLICATE FIGURES AND GRAPHS USING COMBINED (PARLIAMENT)
+
+#Main Regression Code
+```{r}
+
+# Create mean centered year
+combined$year2 <- combined$year - mean(combined$year, na.rm = TRUE)
+
+vars1 <- as.formula(scale(complexity) ~ scale(lr) + scale(pc) + year2 + cabinet.party) #change from office to cabinet.party
+
+reg.output <- list()
+reg.output[[1]] <- lm(vars1, data = combined,
+                      subset = country == "Germany")
+reg.output[[2]] <- lm(vars1, data = combined,
+                      subset = country == "Spain")
+reg.output[[3]] <- lm(vars1, data = combined,
+                      subset = country == "UK")
+reg.output[[4]] <- lm(vars1, data = combined,
+                      subset = country == "Netherlands")
+```
+
+# Figure 2a
+
+```{r}
+
+coefs <- unlist(lapply(reg.output, function(x) coef(x)[3]))
+se    <- unlist(lapply(reg.output, function(x) sqrt(diag(vcov(x)))[3]))
+min   <- coefs - 1.96 * se
+max   <- coefs + 1.96 * se
+
+names_vec <- c("Parliament GER", "Parliament ESP", "Parliament GBR", "Parliament NLD")
+
+plot.data <- data.frame(
+  names = names_vec,
+  coefs = coefs,
+  se = se,
+  min = min,
+  max = max
+)
+
+plot.data$names <- factor(plot.data$names, levels = rev(plot.data$names))
+
+coef.plot2a <- ggplot(plot.data, aes(x = names, y = coefs)) +
+  geom_point(size = 1) +
+  geom_errorbar(aes(ymin = min, ymax = max), width = .1) +
+  coord_flip() +
+  ylab("Effect of lib-cons ideology") +
+  xlab("") +
+  geom_hline(yintercept = 0) +
+  theme_minimal()
+
+print(coef.plot2a)
+```
+
+# Figure 2b
+
+```{r}
+coefs <- unlist(lapply(reg.output, function(x) coef(x)[2]))
+se    <- unlist(lapply(reg.output, function(x) sqrt(diag(vcov(x)))[2]))
+min   <- coefs - 1.96 * se
+max   <- coefs + 1.96 * se
+
+names_vec <- c("Parliament GER", "Parliament ESP", "Parliament GBR", "Parliament NLD")
+
+plot.data <- data.frame(
+  names = names_vec,
+  coefs = coefs,
+  se = se,
+  min = min,
+  max = max
+)
+
+plot.data$names <- factor(plot.data$names, levels = rev(plot.data$names))
+
+coef.plot2b <- ggplot(plot.data, aes(x = names, y = coefs)) +
+  geom_point(size = 1) +
+  geom_errorbar(aes(ymin = min, ymax = max), width = .1) +
+  coord_flip() +
+  ylab("Effect of left-right ideology") +
+  xlab("") +
+  geom_hline(yintercept = 0) +
+  theme_minimal()
+
+print(coef.plot2b)
+```
+
+## Government/Opposition Plot
+
+```{r}
+coefs <- unlist(lapply(reg.output, function(x) coef(x)[5]))
+se    <- unlist(lapply(reg.output, function(x) sqrt(diag(vcov(x)))[5]))
+min   <- coefs - 1.96 * se
+max   <- coefs + 1.96 * se
+
+names_vec <- c("Parliament GER", "Parliament ESP", "Parliament GBR", "Parliament NLD")
+
+plot.data <- data.frame(
+  names = names_vec,
+  coefs = coefs,
+  se = se,
+  min = min,
+  max = max
+)
+
+plot.data$names <- factor(plot.data$names, levels = rev(plot.data$names))
+
+coef.plotb1 <- ggplot(plot.data, aes(x = names, y = coefs)) +
+  geom_point(size = 1) +
+  geom_errorbar(aes(ymin = min, ymax = max), width = .1) +
+  coord_flip() +
+  ylab("Effect of government status") +
+  xlab("") +
+  geom_hline(yintercept = 0) +
+  theme_minimal()
+
+print(coef.plotb1)
+```
+
+## Figure 3A) Time Series Plot
+
+```{r}
+combined.subset <- combined
+
+combined.subset$id <- ifelse(combined.subset$country == "Germany", "GER",
+                      ifelse(combined.subset$country == "Spain", "ESP",
+                      ifelse(combined.subset$country == "UK", "GBR",
+                      ifelse(combined.subset$country == "Netherlands", "NLD", NA))))
+
+combined.subset$year <- as.numeric(combined.subset$year)
+
+time.plot.parl <- ggplot(combined.subset, aes(x = year, y = complexity)) +
+  geom_smooth(se = FALSE) +
+  facet_wrap(~id, nrow = 1) +
+  scale_x_continuous(breaks = c(1990, 2000, 2010), labels = c("'90", "'00", "'10")) +
+  ylab("Complexity") +
+  xlab("") +
+  theme_minimal()
+
+print(time.plot.parl)
+```
+## Figure 4a) Fixed Effects Model
+
+```{r}
+vars3 <- as.formula(complexity ~ lr + pc + year2 + cabinet.party + factor(speaker))
+
+reg.output.fixed <- list()
+reg.output.fixed[[1]] <- lm(vars3, data = combined,
+                            subset = country == "Germany")
+reg.output.fixed[[2]] <- lm(vars3, data = combined,
+                            subset = country == "Spain")
+reg.output.fixed[[3]] <- lm(vars3, data = combined,
+                            subset = country == "UK")
+reg.output.fixed[[4]] <- lm(vars3, data = combined,
+                            subset = country == "Netherlands")
+
+coefs <- unlist(lapply(reg.output.fixed, function(x) coef(x)[3]))
+se    <- unlist(lapply(reg.output.fixed, function(x) sqrt(diag(vcov(x)))[3]))
+min   <- coefs - 1.96 * se
+max   <- coefs + 1.96 * se
+
+names_vec <- c("Parliament GER", "Parliament ESP", "Parliament GBR", "Parliament NLD")
+
+plot.data <- data.frame(
+  names = names_vec,
+  coefs = coefs,
+  se = se,
+  min = min,
+  max = max
+)
+
+plot.data$names <- factor(plot.data$names, levels = rev(plot.data$names))
+
+coef.plot3 <- ggplot(plot.data, aes(x = names, y = coefs)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = min, ymax = max), width = .1) +
+  coord_flip() +
+  ylab("Fixed effect of conservatism") +
+  xlab("") +
+  geom_hline(yintercept = 0) +
+  theme_minimal()
+
+print(coef.plot3)
+```
+
+# Figure 1
+
+```{r}
+library(plyr)
+library(dplyr)
+
+view(combined)
+```
+
+
+```{r}
+# Checking Speaker Names
+unique(combined$speaker)
+
+combined_all <-combined
+
+table(combined_all[combined_all$speaker %in% c(
+  "David Cameron","Gordon Brown","rodriguez zapatero","rajoy brey"
+), "speaker"])
+
+table(combined_all[combined_all$speaker %in% c(
+  "Joseph Fischer","Nick Clegg","Wilders"
+), "speaker"])
+
+#Sara had to fix. Check names of candidates in dataset rather than official name
+
+#missing example1 - Sara had to add
+combined1 <-  combined_all[combined_all$speaker%in%c("David Cameron","Gordon Brown","rodriguez zapatero","rajoy brey"),]
+example1 <- ddply(combined1, "speaker", summarise, 
+                 mean=mean(complexity, na.rm=TRUE), 
+                 SD=sd(complexity, na.rm=TRUE), #change to complexity(replication)
+                 N=length(speaker)) #fix
+example1$N=as.numeric(example1$N)
+example1$se <- example1$SD / sqrt(example1$N)
+example1$min <- example1$mean - 1.96*example1$se
+example1$max <- example1$mean + 1.96*example1$se
+
+#example 2
+combined2 <-combined_all[combined_all$speaker%in%c("Joseph Fischer","Nick Clegg","Wilders"),]
+example2 <- ddply(combined2, "speaker", summarise, 
+                 mean=mean(complexity, na.rm=TRUE), 
+                 SD=sd(complexity, na.rm=TRUE), #change to complexity (replication)
+                 N=length(speaker)) #fix
+example2$N=as.numeric(example2$N)
+example2$se <- example2$SD / sqrt(example2$N)
+example2$min <- example2$mean - 1.96*example2$se
+example2$max <- example2$mean + 1.96*example2$se
+
+
+example <- rbind(example1,example2)
+example$speaker <- c("Brown", "Cameron", "zapatero", "rajoy", "Fischer", "Clegg", "Wilders")
+example$prog <- c(1,0,1,0,1,1,0)
+order <- c(1,2,3,4,5,6,7)
+example <- example[order,]
+example$speaker <- factor(example$speaker, levels=example$speaker)
+example$country <- c("gb","gb","es", "es", "ger", "gb", "nl")
+example$label <- c("UK","UK","ES","ES","GER","UK","NL")
+
+
+
+desc.plot <- ggplot(example, aes(x=speaker, y=mean, fill=factor(prog), country=country)) + 
+  geom_bar(stat="identity") + 
+  geom_errorbar(ymin=example$min,ymax=example$max, width=.2) + 
+geom_text(aes(y = max + 0.5, label = country),
+          hjust = -0.2,
+          size = 4)+
+  coord_flip() + 
+  xlab("") +
+  ylab("Mean Complexity") + 
+  scale_fill_manual(values=c("#56B4E9","#E69F00")) + #"#999999"
+  theme_minimal() + 
+  ylim(c(0,30)) + 
+  guides(fill=FALSE)
+
+
+ggsave(
+  filename = "fig1.pdf",
+  plot = desc.plot,
+  dpi = 900
+)
+
+print(desc.plot)
+```
+
+## APPENDICES
+
+```{r}
+# =========================================================
+# APPENDIX REPLICATION SCRIPT
+# Export tables as PNG/PDF using gt + webshot2
+# Export figure as PNG/PDF using ggplot2::ggsave
+# Countries: Great Britain, Netherlands, Germany, Spain
+# =========================================================
+
+rm(list = ls())
+
+# -----------------------------
+# 1. PACKAGES
+# -----------------------------
+# install.packages(c("dplyr", "ggplot2", "broom", "gt", "webshot2"))
+
+library(dplyr)
+library(ggplot2)
+library(broom)
+library(gt)
+library(webshot2)
+install.packages("xfun")
+install.packages(c("knitr", "rmarkdown", "gt", "htmltools", "webshot2"))
+library(xfun)
+
+# -----------------------------
+# 2. DATA
+# -----------------------------
+# Assumes your combined dataset is already loaded as: combined
+gbr_sample <- readRDS("gbr_sample_edited.rds")
+esp_sample <- readRDS("esp_sample_edited.rds")
+ger_sample <- readRDS("ger_sample_edited.rds")
+nld_sample <- readRDS("nld_sample_edited.rds")
+
+combined <- bind_rows(gbr_sample, esp_sample, ger_sample, nld_sample)
+
+View(combined)
+
+# -----------------------------
+# 3. STANDARDIZE COUNTRY LABELS
+# -----------------------------
+combined <- combined %>%
+  mutate(
+    country = case_when(
+      country %in% c("UK", "GBR", "Great Britain", "Britain", "United Kingdom") ~ "GBR",
+      country %in% c("Netherlands", "NLD", "NL") ~ "NLD",
+      country %in% c("Germany", "GER", "DE") ~ "GER",
+      country %in% c("Spain", "ESP", "ES") ~ "ESP",
+      TRUE ~ as.character(country)
+    )
+  )
+
+combined4 <- combined %>%
+  filter(country %in% c("GBR", "NLD", "GER", "ESP"))
+
+# -----------------------------
+# 4. CREATE GOVERNMENT VARIABLE
+# -----------------------------
+if ("cabinet.party" %in% names(combined4)) {
+  combined4 <- combined4 %>%
+    mutate(in_government = cabinet.party)
+} else if ("office" %in% names(combined4)) {
+  combined4 <- combined4 %>%
+    mutate(in_government = office)
+} else {
+  stop("Need a government-status variable: neither `cabinet.party` nor `office` exists.")
+}
+
+combined4 <- combined4 %>%
+  mutate(
+    in_government = case_when(
+      in_government %in% c(TRUE, "TRUE", "True", "yes", "Yes", "Y", "1") ~ 1,
+      in_government %in% c(FALSE, "FALSE", "False", "no", "No", "N", "0") ~ 0,
+      TRUE ~ suppressWarnings(as.numeric(as.character(in_government)))
+    )
+  )
+
+# -----------------------------
+# 5. CREATE RELATIVE YEAR
+# -----------------------------
+# The appendix tables show year starting at 0 within corpus. :contentReference[oaicite:1]{index=1}
+
+combined4 <- combined4 %>%
+  group_by(country) %>%
+  mutate(year_rel = year - min(year, na.rm = TRUE)) %>%
+  ungroup()
+
+# -----------------------------
+# 6. OPTIONAL FILTER
+# -----------------------------
+# Uncomment if needed:
+# combined4 <- combined4 %>%
+#   filter(data.set == "parliamentary speeches")
+
+table(combined4$country, useNA = "ifany")
+
+# =========================================================
+# 7. HELPER FUNCTIONS
+# =========================================================
+
+# Save a gt table to both PNG and PDF using HTML + webshot2
+save_gt_dual <- function(gt_obj, base_name, zoom = 2.5) {
+  html_file <- paste0(base_name, ".html")
+  png_file  <- paste0(base_name, ".png")
+  pdf_file  <- paste0(base_name, ".pdf")
+
+  gtsave(gt_obj, filename = html_file)
+
+  webshot2::webshot(
+    url = html_file,
+    file = png_file,
+    zoom = zoom
+  )
+
+  webshot2::webshot(
+    url = html_file,
+    file = pdf_file,
+    zoom = zoom
+  )
+}
+
+# Nice gt theme
+style_gt <- function(gt_obj) {
+  gt_obj %>%
+    tab_options(
+      table.font.size = px(13),
+      heading.title.font.size = px(16),
+      heading.subtitle.font.size = px(12),
+      data_row.padding = px(4),
+      table.width = pct(100)
+    ) %>%
+    opt_table_outline() %>%
+    opt_row_striping() %>%
+    tab_style(
+      style = cell_text(weight = "bold"),
+      locations = cells_column_labels(everything())
+    )
+}
+
+# Format p-values as stars
+star_p <- function(p) {
+  case_when(
+    is.na(p)      ~ "",
+    p < 0.01      ~ "***",
+    p < 0.05      ~ "**",
+    p < 0.10      ~ "*",
+    TRUE          ~ ""
+  )
+}
+
+# Build regression table like appendix layout:
+# estimate on one line, SE in parentheses on next line
+make_reg_table <- function(model_list, col_labels, table_title, note_text,
+                           add_party_fe = FALSE) {
+
+  term_order <- c("(Intercept)", "lr", "pc", "year_rel", "in_government")
+  term_labels <- c(
+    "(Intercept)"   = "Constant",
+    "lr"            = "Left-Right",
+    "pc"            = "Progressive-Conservative",
+    "year_rel"      = "Year",
+    "in_government" = "In government"
+  )
+
+  coef_blocks <- lapply(seq_along(model_list), function(i) {
+    td <- broom::tidy(model_list[[i]]) %>%
+      filter(term %in% term_order) %>%
+      mutate(
+        estimate_fmt = sprintf("%.3f%s", estimate, star_p(p.value)),
+        se_fmt = sprintf("(%.3f)", std.error)
+      ) %>%
+      select(term, estimate_fmt, se_fmt)
+
+    full_terms <- tibble(term = term_order) %>%
+      left_join(td, by = "term") %>%
+      mutate(
+        estimate_fmt = ifelse(is.na(estimate_fmt), "", estimate_fmt),
+        se_fmt = ifelse(is.na(se_fmt), "", se_fmt)
+      )
+
+    out <- tibble(
+      row_key = c(rbind(term_order, paste0(term_order, "_se"))),
+      !!col_labels[i] := c(rbind(full_terms$estimate_fmt, full_terms$se_fmt))
+    )
+
+    out
+  })
+
+  coef_table <- Reduce(function(x, y) full_join(x, y, by = "row_key"), coef_blocks)
+
+  label_df <- tibble(
+    row_key = c(rbind(term_order, paste0(term_order, "_se"))),
+    term_label = c(rbind(unname(term_labels[term_order]), rep("", length(term_order))))
+  )
+
+  body <- label_df %>%
+    left_join(coef_table, by = "row_key") %>%
+    select(term_label, all_of(col_labels))
+
+  # GOF rows
+  gof_rows <- tibble(
+    term_label = c("Observations", "R2", "Adjusted R2", "Residual Std. Error", "F Statistic"),
+    !!!setNames(vector("list", length(col_labels)), col_labels)
+  )
+
+  for (i in seq_along(model_list)) {
+    sm <- summary(model_list[[i]])
+    fstat <- sm$fstatistic
+
+    gof_rows[[col_labels[i]]] <- c(
+      format(nobs(model_list[[i]]), big.mark = ","),
+      sprintf("%.3f", sm$r.squared),
+      sprintf("%.3f", sm$adj.r.squared),
+      sprintf("%.3f", sm$sigma),
+      sprintf("%.3f", unname(fstat[1]))
+    )
+  }
+
+  if (add_party_fe) {
+    fe_row <- tibble(
+      term_label = "Party Fixed Effects?",
+      !!!setNames(as.list(rep("Yes", length(col_labels))), col_labels)
+    )
+    final_table <- bind_rows(body, fe_row, gof_rows)
+  } else {
+    final_table <- bind_rows(body, gof_rows)
+  }
+
+  gt_tbl <- final_table %>%
+    gt(rowname_col = "term_label") %>%
+    tab_header(
+      title = md(table_title)
+    ) %>%
+    cols_label(.list = setNames(as.list(col_labels), col_labels)) %>%
+    cols_align(
+      align = "center",
+      columns = all_of(col_labels)
+    ) %>%
+    tab_source_note(
+      source_note = note_text
+    ) %>%
+    style_gt()
+
+  gt_tbl
+}
+
+# =========================================================
+# APPENDIX A: DESCRIPTIVE TABLES
+# Tables A.3, A.4, A.5, A.7 in your four-country setup. :contentReference[oaicite:2]{index=2}
+# =========================================================
+
+make_desc_table <- function(df, country_code) {
+  sub <- df %>% filter(country == country_code)
+
+  tibble(
+    Statistic = c("Complexity", "Left-Right", "Progressive-Conservative", "Year", "In government"),
+    N = c(
+      sum(!is.na(sub$complexity)),
+      sum(!is.na(sub$lr)),
+      sum(!is.na(sub$pc)),
+      sum(!is.na(sub$year_rel)),
+      sum(!is.na(sub$in_government))
+    ),
+    Mean = c(
+      mean(sub$complexity, na.rm = TRUE),
+      mean(sub$lr, na.rm = TRUE),
+      mean(sub$pc, na.rm = TRUE),
+      mean(sub$year_rel, na.rm = TRUE),
+      mean(sub$in_government, na.rm = TRUE)
+    ),
+    `St. Dev.` = c(
+      sd(sub$complexity, na.rm = TRUE),
+      sd(sub$lr, na.rm = TRUE),
+      sd(sub$pc, na.rm = TRUE),
+      sd(sub$year_rel, na.rm = TRUE),
+      sd(sub$in_government, na.rm = TRUE)
+    ),
+    Min = c(
+      min(sub$complexity, na.rm = TRUE),
+      min(sub$lr, na.rm = TRUE),
+      min(sub$pc, na.rm = TRUE),
+      min(sub$year_rel, na.rm = TRUE),
+      min(sub$in_government, na.rm = TRUE)
+    ),
+    `Pctl(25)` = c(
+      quantile(sub$complexity, 0.25, na.rm = TRUE),
+      quantile(sub$lr, 0.25, na.rm = TRUE),
+      quantile(sub$pc, 0.25, na.rm = TRUE),
+      quantile(sub$year_rel, 0.25, na.rm = TRUE),
+      quantile(sub$in_government, 0.25, na.rm = TRUE)
+    ),
+    `Pctl(75)` = c(
+      quantile(sub$complexity, 0.75, na.rm = TRUE),
+      quantile(sub$lr, 0.75, na.rm = TRUE),
+      quantile(sub$pc, 0.75, na.rm = TRUE),
+      quantile(sub$year_rel, 0.75, na.rm = TRUE),
+      quantile(sub$in_government, 0.75, na.rm = TRUE)
+    ),
+    Max = c(
+      max(sub$complexity, na.rm = TRUE),
+      max(sub$lr, na.rm = TRUE),
+      max(sub$pc, na.rm = TRUE),
+      max(sub$year_rel, na.rm = TRUE),
+      max(sub$in_government, na.rm = TRUE)
+    )
+  ) %>%
+    mutate(
+      N = format(N, big.mark = ","),
+      across(c(Mean, `St. Dev.`, Min, `Pctl(25)`, `Pctl(75)`, Max), ~ round(., 3))
+    )
+}
+
+table_A3_GER <- make_desc_table(combined4, "GER")
+table_A4_ESP <- make_desc_table(combined4, "ESP")
+table_A5_GBR <- make_desc_table(combined4, "GBR")
+table_A7_NLD <- make_desc_table(combined4, "NLD")
+
+gt_A3 <- table_A3_GER %>%
+  gt(rowname_col = "Statistic") %>%
+  tab_header(title = md("**Table A.3: Parliament GER**")) %>%
+  style_gt()
+
+gt_A4 <- table_A4_ESP %>%
+  gt(rowname_col = "Statistic") %>%
+  tab_header(title = md("**Table A.4: Parliament ESP**")) %>%
+  style_gt()
+
+gt_A5 <- table_A5_GBR %>%
+  gt(rowname_col = "Statistic") %>%
+  tab_header(title = md("**Table A.5: Parliament GBR**")) %>%
+  style_gt()
+
+gt_A7 <- table_A7_NLD %>%
+  gt(rowname_col = "Statistic") %>%
+  tab_header(title = md("**Table A.7: Parliament NLD**")) %>%
+  style_gt()
+
+gtsave(gt_A3, "Table_A3_Parliament_GER.html")
+gtsave(gt_A4, "Table_A4_Parliament_ESP.html")
+gtsave(gt_A5, "Table_A5_Parliament_GBR.html")
+gtsave(gt_A7, "Table_A7_Parliament_NLD.html")
+
+# Optional combined Appendix A file
+appendix_A_all <- bind_rows(
+  table_A3_GER %>% mutate(Corpus = "Parliament GER"),
+  table_A4_ESP %>% mutate(Corpus = "Parliament ESP"),
+  table_A5_GBR %>% mutate(Corpus = "Parliament GBR"),
+  table_A7_NLD %>% mutate(Corpus = "Parliament NLD")
+) %>%
+  select(Corpus, everything())
+
+gt_A_all <- appendix_A_all %>%
+  gt(groupname_col = "Corpus", rowname_col = "Statistic") %>%
+  tab_header(title = md("**Appendix A: Descriptive statistics**")) %>%
+  style_gt()
+
+gtsave(gt_A_all, "Appendix_A_all_descriptives.html")
+
+# =========================================================
+# APPENDIX B: FIGURE B.1
+# OLS regression of complexity on government status and time. :contentReference[oaicite:3]{index=3}
+# =========================================================
+
+model_B_GER <- lm(scale(complexity) ~ scale(lr) + scale(pc) + year_rel + in_government,
+                  data = combined4, subset = country == "GER")
+
+model_B_ESP <- lm(scale(complexity) ~ scale(lr) + scale(pc) + year_rel + in_government,
+                  data = combined4, subset = country == "ESP")
+
+model_B_GBR <- lm(scale(complexity) ~ scale(lr) + scale(pc) + year_rel + in_government,
+                  data = combined4, subset = country == "GBR")
+
+model_B_NLD <- lm(scale(complexity) ~ scale(lr) + scale(pc) + year_rel + in_government,
+                  data = combined4, subset = country == "NLD")
+
+coef_B <- bind_rows(
+  tidy(model_B_NLD, conf.int = TRUE) %>% mutate(dataset = "Parliament NLD"),
+  tidy(model_B_GBR, conf.int = TRUE) %>% mutate(dataset = "Parliament GBR"),
+  tidy(model_B_ESP, conf.int = TRUE) %>% mutate(dataset = "Parliament ESP"),
+  tidy(model_B_GER, conf.int = TRUE) %>% mutate(dataset = "Parliament GER")
+) %>%
+  filter(term == "in_government")
+
+coef_B$dataset <- factor(
+  coef_B$dataset,
+  levels = c("Parliament NLD", "Parliament GBR", "Parliament ESP", "Parliament GER")
+)
+
+fig_B1 <- ggplot(coef_B, aes(x = estimate, y = dataset)) +
+  geom_point(size = 2.8) +
+  geom_errorbarh(aes(xmin = conf.low, xmax = conf.high), height = 0.15) +
+  geom_vline(xintercept = 0, linetype = "solid") +
+  labs(
+    title = "Figure B.1: OLS regression of complexity on government status and time",
+    subtitle = "Government status and complexity",
+    x = "Effect of government status",
+    y = NULL,
+    caption = "Note: This plot reports standardized regression coefficients for government-opposition status in four OLS regression models. The bars represent the 95% confidence intervals of the coefficients."
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title = element_text(face = "bold"),
+    plot.subtitle = element_text(face = "bold"),
+    axis.text.y = element_text(size = 11),
+    plot.caption = element_text(size = 9, hjust = 0)
+  )
+
+ggsave("Figure_B1_government_status.png", fig_B1, width = 8.5, height = 5.5, dpi = 300)
+ggsave("Figure_B1_government_status.pdf", fig_B1, width = 8.5, height = 5.5)
+
+# =========================================================
+# APPENDIX C: TABLE C.1 OLS REGRESSION RESULTS
+# complexity ~ lr + pc + year + in government. :contentReference[oaicite:4]{index=4}
+# =========================================================
+
+model_C_GER <- lm(complexity ~ lr + pc + year_rel + in_government,
+                  data = combined4, subset = country == "GER")
+
+model_C_ESP <- lm(complexity ~ lr + pc + year_rel + in_government,
+                  data = combined4, subset = country == "ESP")
+
+model_C_GBR <- lm(complexity ~ lr + pc + year_rel + in_government,
+                  data = combined4, subset = country == "GBR")
+
+model_C_NLD <- lm(complexity ~ lr + pc + year_rel + in_government,
+                  data = combined4, subset = country == "NLD")
+
+gt_C1 <- make_reg_table(
+  model_list = list(model_C_GER, model_C_ESP, model_C_GBR, model_C_NLD),
+  col_labels = c("GER Parl", "ESP Parl", "GBR Parl", "NLD Parl"),
+  table_title = "**Table C.1: OLS regression results**",
+  note_text = md("Note: *p*<0.1; **p*<0.05; ***p*<0.01")
+)
+
+gtsave(gt_C1, "Table_C1_OLS.html")
+
+
+# =========================================================
+# APPENDIX D: TABLE D.1 SPEAKER FIXED EFFECTS
+# Speaker fixed effects regression models of complexity. :contentReference[oaicite:5]{index=5}
+# =========================================================
+
+model_D_GER <- lm(complexity ~ lr + pc + year_rel + in_government + factor(speaker),
+                  data = combined4, subset = country == "GER")
+
+model_D_ESP <- lm(complexity ~ lr + pc + year_rel + in_government + factor(speaker),
+                  data = combined4, subset = country == "ESP")
+
+model_D_GBR <- lm(complexity ~ lr + pc + year_rel + in_government + factor(speaker),
+                  data = combined4, subset = country == "GBR")
+
+model_D_NLD <- lm(complexity ~ lr + pc + year_rel + in_government + factor(speaker),
+                  data = combined4, subset = country == "NLD")
+
+gt_D1 <- make_reg_table(
+  model_list = list(model_D_GER, model_D_ESP, model_D_GBR, model_D_NLD),
+  col_labels = c("GER Parl", "ESP Parl", "GBR Parl", "NLD Parl"),
+  table_title = "**Table D.1: Speaker fixed effects regression results**",
+  note_text = md("Note: *p*<0.1; **p*<0.05; ***p*<0.01"),
+  add_party_fe = TRUE
+)
+
+gtsave(gt_D1, "Table_D1_Speaker_FE.html")
+
+
+# =========================================================
+# 8. DIAGNOSTICS
+# =========================================================
+
+cat("\nFiles saved to:\n")
+print(getwd())
+
+cat("\nCreated files:\n")
+print(list.files(pattern = "Table_|Appendix_A|Figure_B1"))
+
+cat("\nObservations used in OLS models:\n")
+print(c(
+  GER = nobs(model_C_GER),
+  ESP = nobs(model_C_ESP),
+  GBR = nobs(model_C_GBR),
+  NLD = nobs(model_C_NLD)
+))
+
+cat("\nObservations used in FE models:\n")
+print(c(
+  GER = nobs(model_D_GER),
+  ESP = nobs(model_D_ESP),
+  GBR = nobs(model_D_GBR),
+  NLD = nobs(model_D_NLD)
+))
+
+```
+
+## REPLICATION MAIN FIGURES AND TABLES - COMBINED OTHER (EU AND CONGRESS NLD)
+
+# FIGURE 2A 
+
+```{r}
+# ---------------------------------
+# FIGURE 2A USING combined_other
+# ---------------------------------
+
+library(ggplot2)
+
+eu_sample <- readRDS("eu_sample_edited.rds")
+congress_nld_sample <- readRDS("congress_nld_sample_edited.rds")
+
+combined_other <- bind_rows(eu_sample, congress_nld_sample)
+
+names(combined_other)
+View(combined_other)
+
+# Create mean-centered year
+combined_other$year2 <- combined_other$year - mean(combined_other$year, na.rm = TRUE)
+
+# Main regression formula
+vars1 <- as.formula(scale(complexity) ~ scale(lr) + scale(pc) + year2)
+
+# Run models for the datasets in combined_other
+reg.output.other <- list()
+
+# 1. EU / Heads of Government
+reg.output.other[[1]] <- lm(
+  vars1,
+  data = combined_other,
+  subset = parliament == "Heads of Government"
+)
+
+# 2. Netherlands Congress
+reg.output.other[[2]] <- lm(
+  vars1,
+  data = combined_other,
+  subset = parliament == "Dutch Congress Speeches"
+)
+
+# Extract coefficient on pc (the 3rd coefficient in your model)
+coefs <- unlist(lapply(reg.output.other, function(x) coef(x)[3]))
+se    <- unlist(lapply(reg.output.other, function(x) sqrt(diag(vcov(x)))[3]))
+min   <- coefs - 1.96 * se
+max   <- coefs + 1.96 * se
+
+# Labels for plot
+names_vec <- c("Heads of Government", "Congress NLD")
+
+plot.data <- data.frame(
+  names = names_vec,
+  coefs = coefs,
+  se = se,
+  min = min,
+  max = max
+)
+
+plot.data$names <- factor(plot.data$names, levels = rev(plot.data$names))
+
+coef.plot2a_other <- ggplot(plot.data, aes(x = names, y = coefs)) +
+  geom_point(size = 1) +
+  geom_errorbar(aes(ymin = min, ymax = max), width = 0.1) +
+  coord_flip() +
+  ylab("Effect of lib-cons ideology") +
+  xlab("") +
+  geom_hline(yintercept = 0) +
+  theme_minimal()
+
+print(coef.plot2a_other)
+```
+# Figure 2b
+
+```{r}
+coefs <- unlist(lapply(reg.output.other, function(x) coef(x)["scale(lr)"]))
+se    <- unlist(lapply(reg.output.other, function(x) sqrt(diag(vcov(x)))["scale(lr)"]))
+min   <- coefs - 1.96 * se
+max   <- coefs + 1.96 * se
+
+plot.data <- data.frame(
+  names = c("Heads of Government", "Congress NLD"),
+  coefs = coefs,
+  se = se,
+  min = min,
+  max = max
+)
+
+plot.data$names <- factor(plot.data$names, levels = rev(plot.data$names))
+
+coef.plot2b <- ggplot(plot.data, aes(x = names, y = coefs)) +
+  geom_point(size = 1) +
+  geom_errorbar(aes(ymin = min, ymax = max), width = 0.1) +
+  coord_flip() +
+  ylab("Effect of left-right ideology") +
+  xlab("") +
+  geom_hline(yintercept = 0) +
+  theme_minimal()
+
+print(coef.plot2b)
+```
+
+# Figure 3B) Time Series Plot - Congress Dutch NLD
+673 observations
+
+Need to use fewer breaks, since less length of time...
+
+
+```{r}
+library(ggplot2)
+
+# Keep only Dutch congress speeches
+combined.subset <- subset(
+  combined_other,
+  parliament != "Dutch Congress Speeches"
+)
+
+# Create id label
+combined.subset$id <- "NLD"
+
+# Make sure year is numeric
+combined.subset$year <- as.numeric(combined.subset$year)
+
+# Check Number of Unique Years
+length(unique(combined.subset$year))
+table(combined.subset$year)
+
+# Plot
+time.plot.nld.congress <- ggplot(combined.subset, aes(x = year, y = complexity)) +
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_x_continuous(
+    breaks = c(1990, 2000, 2010),
+    labels = c("'90", "'00", "'10")
+  ) +
+  ylab("Complexity") +
+  xlab("") +
+  theme_minimal()
+
+print(time.plot.nld.congress)
+
+
+
+```
+# Figure 4A) Congress NLD only
+
+```{r}
+library(ggplot2)
+
+# ---------------------------------
+# 1. Create mean-centered year
+# ---------------------------------
+combined_other$year2 <- combined_other$year - mean(combined_other$year, na.rm = TRUE)
+
+# ---------------------------------
+# 2. Keep only Dutch congress speeches
+# ---------------------------------
+nld_congress <- subset(
+  combined_other,
+  parliament != "Dutch Congress Speeches"
+)
+
+
+# ---------------------------------
+# 3. Fixed-effects model
+# ---------------------------------
+vars3 <- as.formula(complexity ~ lr + pc + year2 + factor(speaker))
+
+reg.output.fixed.other <- lm(vars3, data = nld_congress)
+
+summary(reg.output.fixed.other)
+
+coefs <- coef(reg.output.fixed.other)["pc"]
+se    <- sqrt(diag(vcov(reg.output.fixed.other)))["pc"]
+min   <- coefs - 1.96 * se
+max   <- coefs + 1.96 * se
+
+plot.data <- data.frame(
+  names = "Congress NLD",
+  coefs = coefs,
+  se = se,
+  min = min,
+  max = max
+)
+
+plot.data$names <- factor(plot.data$names, levels = rev(plot.data$names))
+
+coef.plot4a_nld <- ggplot(plot.data, aes(x = names, y = coefs)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = min, ymax = max), width = 0.1) +
+  coord_flip() +
+  ylab("Fixed effect of conservatism") +
+  xlab("") +
+  geom_hline(yintercept = 0) +
+  theme_minimal()
+
+print(coef.plot4a_nld)
+
+```
+# Figure 4B)
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+# ---------------------------------
+# 1. Filter to Dutch congress only
+# ---------------------------------
+nld_congress <- combined_other %>%
+  filter(parliament == "Dutch Congress Speeches") %>%
+  mutate(year = as.numeric(year))
+
+# ---------------------------------
+# 2. Collapse to yearly means
+# ---------------------------------
+plot_df <- nld_congress %>%
+  group_by(year) %>%
+  dplyr::summarise(
+    complexity = mean(complexity, na.rm = TRUE),
+    ideology   = mean(pc, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+# ---------------------------------
+# 3. Standardize both series
+# ---------------------------------
+plot_df <- plot_df %>%
+  mutate(
+    complexity_z = as.numeric(scale(complexity)),
+    ideology_z   = as.numeric(scale(ideology))
+  )
+
+# ---------------------------------
+# 4. Convert to long format
+# ---------------------------------
+plot_long <- plot_df %>%
+  select(year, complexity_z, ideology_z) %>%
+  pivot_longer(
+    cols = c(complexity_z, ideology_z),
+    names_to = "series",
+    values_to = "value"
+  ) %>%
+  mutate(
+    series = recode(
+      series,
+      complexity_z = "complexity",
+      ideology_z   = "ideology"
+    )
+  )
+
+# ---------------------------------
+# 5. Plot Figure 4b style
+# ---------------------------------
+fig4b_nld <- ggplot(plot_long, aes(x = year, y = value, color = series)) +
+  geom_smooth(se = FALSE, span = 0.75) +
+  labs(
+    x = "",
+    y = "Standardized values",
+    color = ""
+  ) +
+  theme_minimal()
+
+print(fig4b_nld)
+```
+## APPENDICES - OTHER COMBINED (HEADS OF GOVERNMENT AND CONGRESS DUTCH)
+
+```{r}
+library(dplyr)
+library(gt)
+
+combined_other2 <- combined_other %>%
+  mutate(
+    year = as.numeric(year),
+    corpus = case_when(
+      parliament == "Heads of Government" ~ "Heads of Government",
+      parliament == "Dutch Congress Speeches" ~ "Party congresses NLD",
+      TRUE ~ NA_character_
+    )
+  ) %>%
+  filter(!is.na(corpus))
+
+library(dplyr)
+library(gt)
+library(webshot2)
+
+# --------------------------------------------------
+# 1. PREP DATA
+# --------------------------------------------------
+combined_other2 <- combined_other %>%
+  mutate(
+    year = as.numeric(year),
+    corpus = case_when(
+      parliament == "Heads of Government" ~ "Heads of Government",
+      parliament == "Dutch Congress Speeches" ~ "Party congresses NLD",
+      TRUE ~ NA_character_
+    )
+  ) %>%
+  filter(!is.na(corpus))
+
+# --------------------------------------------------
+# 2. FUNCTION TO BUILD DESCRIPTIVE TABLE
+# --------------------------------------------------
+make_desc_table <- function(data, corpus_name) {
+  
+  vars <- c("complexity", "lr", "pc")
+  labels <- c(
+    complexity = "Complexity",
+    lr = "Left-Right",
+    pc = "Progressive-Conservative"
+  )
+  
+  out <- lapply(vars, function(v) {
+    x <- data[[v]]
+    data.frame(
+      Statistic = labels[[v]],
+      N = sum(!is.na(x)),
+      Mean = mean(x, na.rm = TRUE),
+      `St. Dev.` = sd(x, na.rm = TRUE),
+      Min = min(x, na.rm = TRUE),
+      `Pctl(25)` = quantile(x, 0.25, na.rm = TRUE),
+      `Pctl(75)` = quantile(x, 0.75, na.rm = TRUE),
+      Max = max(x, na.rm = TRUE),
+      check.names = FALSE
+    )
+  }) %>%
+    bind_rows()
+  
+  gt(out) %>%
+    tab_header(
+      title = md(corpus_name)
+    ) %>%
+    fmt_number(
+      columns = c(Mean, `St. Dev.`, Min, `Pctl(25)`, `Pctl(75)`, Max),
+      decimals = 3
+    ) %>%
+    fmt_number(
+      columns = N,
+      decimals = 0
+    ) %>%
+    cols_align(
+      align = "center",
+      columns = everything()
+    ) %>%
+    tab_style(
+      style = list(
+        cell_text(weight = "bold")
+      ),
+      locations = cells_title(groups = "title")
+    ) %>%
+    opt_table_font(
+      font = list(
+        gt::google_font("Times New Roman"),
+        default_fonts()
+      )
+    ) %>%
+    tab_options(
+      table.font.size = px(14),
+      heading.align = "left",
+      column_labels.font.weight = "bold",
+      table.border.top.width = px(1),
+      table.border.bottom.width = px(1),
+      data_row.padding = px(4)
+    )
+}
+
+# --------------------------------------------------
+# 3. BUILD TABLE A.2 = PARTY CONGRESSES NLD
+# --------------------------------------------------
+table_A2_data <- combined_other2 %>%
+  filter(corpus == "Party congresses NLD")
+
+gt_A2 <- make_desc_table(
+  data = table_A2_data,
+  corpus_name = "Table A.2: Party congresses NLD"
+)
+
+gt_A2
+
+# --------------------------------------------------
+# 4. BUILD TABLE A.8 = HEADS OF GOVERNMENT
+# --------------------------------------------------
+table_A8_data <- combined_other2 %>%
+  filter(corpus == "Heads of Government")
+
+gt_A8 <- make_desc_table(
+  data = table_A8_data,
+  corpus_name = "Table A.8: Heads of Government"
+)
+
+gt_A8
+
+# --------------------------------------------------
+# 5. EXPORT TO PNG / PDF
+# --------------------------------------------------
+gtsave(gt_A2, "Table_A2_Party_Congresses_NLD.html")
+
+gtsave(gt_A8, "Table_A8_Heads_of_Government.html")
+
+library(dplyr)
+library(gt)
+library(broom)
+
+library(dplyr)
+library(gt)
+library(broom)
+
+# --------------------------------------------------
+# 1. PREP DATA
+# --------------------------------------------------
+combined_other2 <- combined_other %>%
+  mutate(
+    year = as.numeric(year),
+    corpus = case_when(
+      parliament == "Heads of Government" ~ "Heads of Government",
+      parliament == "Dutch Congress Speeches" ~ "Party congresses NLD",
+      TRUE ~ NA_character_
+    )
+  ) %>%
+  filter(!is.na(corpus)) %>%
+  mutate(
+    year2 = year - mean(year, na.rm = TRUE)
+  )
+
+# --------------------------------------------------
+# 2. MODEL FUNCTIONS (NO OFFICE)
+# --------------------------------------------------
+fit_ols_model <- function(df) {
+  lm(scale(complexity) ~ scale(lr) + scale(pc) + year2, data = df)
+}
+
+fit_fe_model <- function(df) {
+  lm(complexity ~ lr + pc + year2 + factor(speaker), data = df)
+}
+
+# --------------------------------------------------
+# 3. SPLIT DATA
+# --------------------------------------------------
+df_nld <- combined_other2 %>%
+  filter(corpus == "Party congresses NLD")
+
+df_hog <- combined_other2 %>%
+  filter(corpus == "Heads of Government")
+
+# --------------------------------------------------
+# 4. FIT MODELS
+# --------------------------------------------------
+mod_C1_nld <- fit_ols_model(df_nld)
+mod_C1_hog <- fit_ols_model(df_hog)
+
+mod_D1_nld <- fit_fe_model(df_nld)
+mod_D1_hog <- fit_fe_model(df_hog)
+
+# --------------------------------------------------
+# 5. FORMAT HELPERS
+# --------------------------------------------------
+star_p <- function(p) {
+  case_when(
+    is.na(p) ~ "",
+    p < 0.001 ~ "***",
+    p < 0.01  ~ "**",
+    p < 0.05  ~ "*",
+    TRUE ~ ""
+  )
+}
+
+fmt_coef <- function(est, se, p) {
+  if (is.na(est)) return("")
+  paste0(
+    sprintf("%.3f", est),
+    star_p(p),
+    "<br>(",
+    sprintf("%.3f", se),
+    ")"
+  )
+}
+
+extract_model <- function(model, terms, include_fe = FALSE) {
+  td <- broom::tidy(model)
+  gl <- broom::glance(model)
+  
+  out <- sapply(terms, function(term_name) {
+    row <- td[td$term == term_name, ]
+    if (nrow(row) == 0) return("")
+    fmt_coef(row$estimate[1], row$std.error[1], row$p.value[1])
+  })
+  
+  out <- as.list(out)
+  
+  out[["Speaker fixed effects"]] <- if (include_fe) "Yes" else "No"
+  out[["N"]] <- formatC(gl$nobs[1], format = "d", big.mark = ",")
+  out[["R²"]] <- sprintf("%.3f", gl$r.squared[1])
+  out[["Adj. R²"]] <- sprintf("%.3f", gl$adj.r.squared[1])
+  
+  out
+}
+
+# --------------------------------------------------
+# 6. TERMS
+# --------------------------------------------------
+terms_C1 <- c("scale(lr)", "scale(pc)", "year2")
+terms_D1 <- c("lr", "pc", "year2")
+
+row_names <- c(
+  "Left-Right",
+  "Progressive-Conservative",
+  "Year",
+  "Speaker fixed effects",
+  "N",
+  "R²",
+  "Adj. R²"
+)
+
+# --------------------------------------------------
+# 7. TABLE C.1 (OLS)
+# --------------------------------------------------
+col_C1_nld <- extract_model(mod_C1_nld, terms_C1, include_fe = FALSE)
+col_C1_hog <- extract_model(mod_C1_hog, terms_C1, include_fe = FALSE)
+
+table_C1 <- data.frame(
+  Term = row_names,
+  `Party congresses NLD` = unname(unlist(col_C1_nld)),
+  `Heads of Government` = unname(unlist(col_C1_hog)),
+  check.names = FALSE
+)
+
+gt_C1 <- gt(table_C1) %>%
+  tab_header(
+    title = md("**Table C.1. OLS models: Combined other corpora**")
+  ) %>%
+  fmt_markdown(columns = -Term) %>%
+  cols_align(align = "center", columns = -Term) %>%
+  cols_align(align = "left", columns = Term) %>%
+  tab_source_note(
+    source_note = md("* p < .05, ** p < .01, *** p < .001")
+  )
+
+gt_C1
+
+# --------------------------------------------------
+# 8. TABLE D.1 (FE MODELS)
+# --------------------------------------------------
+col_D1_nld <- extract_model(mod_D1_nld, terms_D1, include_fe = TRUE)
+col_D1_hog <- extract_model(mod_D1_hog, terms_D1, include_fe = TRUE)
+
+table_D1 <- data.frame(
+  Term = row_names,
+  `Party congresses NLD` = unname(unlist(col_D1_nld)),
+  `Heads of Government` = unname(unlist(col_D1_hog)),
+  check.names = FALSE
+)
+
+gt_D1 <- gt(table_D1) %>%
+  tab_header(
+    title = md("**Table D.1. Speaker fixed-effects models: Combined other corpora**")
+  ) %>%
+  fmt_markdown(columns = -Term) %>%
+  cols_align(align = "center", columns = -Term) %>%
+  cols_align(align = "left", columns = Term) %>%
+  tab_source_note(
+    source_note = md("* p < .05, ** p < .01, *** p < .001")
+  )
+
+gt_D1
+
+# --------------------------------------------------
+# 9. SAVE (NO CHROME NEEDED)
+# --------------------------------------------------
+gtsave(gt_C1, "Table_C1.html")
+gtsave(gt_D1, "Table_D1.html")
+
+```
+

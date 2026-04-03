@@ -1846,8 +1846,7 @@ model_D_ESP <- lm(complexity ~ lr + pc + year_rel + in_government + factor(speak
 model_D_GBR <- lm(complexity ~ lr + pc + year_rel + in_government + factor(speaker),
                   data = combined4, subset = country == "GBR")
 
-model_D_NLD <- lm(complexity ~ lr + pc + year_rel + in_government + factor(speaker),
-                  data = combined4, subset = country == "NLD")
+model_D_NLD <- lm(complexity ~ lr + pc + year_rel + in_government + factor(speaker), data = combined4, subset = country == "NLD")
 
 gt_D1 <- make_reg_table(
   model_list = list(model_D_GER, model_D_ESP, model_D_GBR, model_D_NLD),

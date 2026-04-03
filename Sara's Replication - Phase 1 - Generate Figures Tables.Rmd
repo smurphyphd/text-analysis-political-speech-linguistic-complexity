@@ -51,14 +51,18 @@ library(devtools)
 library(stringr)
 library(plyr)
 
-#load data - Sara change code to run
-library(tidyverse) 
+#load data - from Git Hub Repository
+library(tidyverse)
+library(here)
 
-setwd("~/Documents/GitHub/Text Analysis Course/Replication Project/dataverse_files-2")
+here()
+getwd()
+file.exists(here("dataverse", "phase1", "speeches.RData"))
 
 temp_env <- new.env()
-load("speeches.RData", envir = temp_env)
+load(here("dataverse", "phase1", "speeches.RData"), envir = temp_env)
 ls(temp_env)
+
 speeches <- temp_env$speeches
 
 View(speeches)      # spreadsheet view

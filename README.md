@@ -34,10 +34,10 @@ The replication occurs in the following sequence:
 The replication uses data from:
 
 - Harvard Dataverse: https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/S4IZ8K
-- Phase 1: Pre-processed full speech data =
-- Phase 2a: Unprocessed parliament speech corpora (UK, Germany, Spain, Netherlands) =
-- Phase 2b: Unprocessed EU speech corpora = 
-- Phase 2b: Unprocessed congress Netherlands corpora = 
+- Phase 1: Pre-processed full speech data = speeches.RData
+- Phase 2a: Unprocessed parliament speech corpora (UK, Germany, Spain, Netherlands) = HouseofCommons_Sample.Rdata, Bundestag_Sample.Rdata, Congresso_Sample.Rdata, TweedeKamer_Sample.Rdata
+- Phase 2b: Unprocessed EU speech corpora = euspeech_validation.Rdata
+- Phase 2b: Unprocessed congress Netherlands corpora = congress_dutch_validation.Rdata
 
 Due to licensing restrictions, some raw data may not be redistributed. Instructions for access are provided below.
 

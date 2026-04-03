@@ -314,11 +314,14 @@ print(coef.plot3)
 
 ```{r}
 # #congress speech --------------------------------------------------------
-setwd("~/Documents/GitHub/Text Analysis Course/Replication Project/dataverse_files-2")
-temp_env <- new.env()
-load("congressspeech.RData", envir = temp_env)
+#Load Data
+here()
+getwd()
+file.exists(here("dataverse", "phase1", "congressspeech.RData"))
 
-ls(temp_env)   # shows "speeches"
+temp_env <- new.env()
+load(here("dataverse", "phase1", "congressspeech.RData"), envir = temp_env)
+ls(temp_env)
 
 congressspeech <- temp_env$speeches
 
@@ -358,11 +361,15 @@ print(selection.plot)
 
 ```{r}
 # # EU Speech -------------------------------------------------------------
-setwd("~/Documents/GitHub/Text Analysis Course/Replication Project/dataverse_files-2")
-temp_env <- new.env()
-load("euspeech.RData", envir = temp_env)
+#Load Data
+here()
+getwd()
+file.exists(here("dataverse", "phase1", "euspeech.RData"))
 
-ls(temp_env)   # shows "speeches"
+temp_env <- new.env()
+load(here("dataverse", "phase1", "euspeech.RData"), envir = temp_env)
+ls(temp_env)
+
 
 euspeech <- temp_env$speeches
 
@@ -388,11 +395,16 @@ example1 <- example1[c(4,6,8,10),] # select only cameron, brown, rajoy & zapater
 
 ```{r}
 # Parlspeech
-setwd("~/Documents/GitHub/Text Analysis Course/Replication Project/dataverse_files-2")
-temp_env <- new.env()
-load("parlspeech.RData", envir = temp_env)
+#load data
 
-ls(temp_env)   # shows "speeches"
+here()
+getwd()
+file.exists(here("dataverse", "phase1", "parlspeech.Rdata"))
+
+temp_env <- new.env()
+load(here("dataverse", "phase1", "parlspeech.Rdata"), envir = temp_env)
+ls(temp_env)
+
 
 parlspeech <- temp_env$speeches
 

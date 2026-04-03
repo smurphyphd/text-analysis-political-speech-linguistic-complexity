@@ -14,6 +14,11 @@ This repository contains a replication of:
 - Figures and Tables created by Sara for replication are found in "figures and tables" folder.
 - Replication report created by Sara, outlining replication process, main differences, replication autopsy and replication extension is found in "report" folder.
 ---
+# Steps
+
+- Download by clicking green "Code" button.
+- Save zipped file to desktop, maintaining file structure from the repository.
+- RMarkdown files should run accordingly.
 
 # Overview
 

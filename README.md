@@ -72,6 +72,8 @@ Required packages:
 ```r
 install.packages(c(
   "tidyverse",
+  "here",
+   "xfun",
   "quanteda",
   "quanteda.textstats",
   "ggplot2",

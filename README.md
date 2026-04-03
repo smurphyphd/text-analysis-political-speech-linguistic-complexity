@@ -9,6 +9,9 @@ This repository contains a replication of:
 
 - A link to the public version of the journal article can be found here: https://pmc.ncbi.nlm.nih.gov/articles/PMC6364865/. PDF copies are found in "docs" folder.
 - In-class replication presentation is found in "presentation" folder.
+- Harvard Dataverse data files and Rscripts used in replication are found in "dataverse" folder.
+- Code Rscripts created by Sara for replication are found in "code" folder.
+- Figures and Tables created by Sara for replication are found in "figures and tables" folder.
 ---
 
 # Overview

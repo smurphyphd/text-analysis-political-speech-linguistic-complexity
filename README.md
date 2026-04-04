@@ -11,7 +11,6 @@ This repository contains a replication of:
 - In-class replication presentation by Sara is found in "presentation" folder.
 - Harvard Dataverse data files and Rscripts (from Authors) used in replication are found in "dataverse" folder.
 - Code RMarkdowns created by Sara for replication are found in the main branch of the repository.
-- Figures and Tables created by Sara for replication are found in "figures and tables" folder.
 - Replication report created by Sara, outlining replication process, main differences, replication autopsy and replication extension is found in "report" folder.
 ---
 # Steps
@@ -78,5 +77,11 @@ install.packages(c(
   "quanteda.textstats",
   "ggplot2",
   "gt",
-  "webshot2"
+  "webshot2",
+"stringr",
+"stargazer",
+"merTools",
+"devtools",
+"plyr",
+"dplyr"
 ))

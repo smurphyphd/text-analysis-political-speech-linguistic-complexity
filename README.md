@@ -62,6 +62,13 @@ The code is found within 2 R Markdown files. They will run separately - they do 
 
 ---
 
+# Replication Report & Presentation
+
+- 5 page report summarizing the journal article, replication process, replication results/differences, replication autopsy and replication extension included in "docs".
+- Presentation slides showing in detail replication figures and tables included in "docs". 
+
+---
+
 ## ⚙️ Requirements
 
 R version ≥ 4.2
